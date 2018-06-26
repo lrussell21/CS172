@@ -2,4 +2,4 @@
 #include "People.h"
 using namespace std;
 
-Patient::Patient(string name) : People(name){}
+Patient::Patient(string firstName, string lastName) : People(firstName, lastName){}

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Doctor::Doctor(string DocName) : People(DocName) {};
+Doctor::Doctor(string docFirstName, string docLastName) : People(docFirstName, docLastName) {};
 
 void Doctor::set_Profession(string ProfessionEnter) {
   type = ProfessionEnter;

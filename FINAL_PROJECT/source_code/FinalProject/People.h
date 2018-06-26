@@ -6,11 +6,13 @@
 using namespace std;
 class People {
 private:
-  string name;
+  string firstName;
+  string lastName;
 public:
-  People(string);
-  string get_name();
-  void set_name(string);
+  People(string, string);
+  string get_firstName();
+  string get_lastName();
+  void set_name(string, string);
 };
 
 #endif // !PEOPLE_H

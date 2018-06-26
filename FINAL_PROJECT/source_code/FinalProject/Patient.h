@@ -3,7 +3,7 @@
 #include "People.h"
 class Patient : public People {
 public:
-  Patient(string name);
+  Patient(string, string);
 };
 
 #endif

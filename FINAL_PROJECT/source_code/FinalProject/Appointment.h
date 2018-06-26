@@ -17,8 +17,8 @@ private:
 public:
   Appointment();
   void set_Appointment(Patient pat, Doctor doc, Date Setdate);
-  void del_Appointment(string eraseName);
-  void get_Appointment(string nameInput);
+  void del_Appointment(string eraseFirstName, string eraseLastName);
+  void get_Appointment(string firstNameInput, string lastNameInput);
   int get_amount();
   Date get_time(int index);
   Patient get_Patient(int index);

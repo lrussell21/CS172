@@ -19,10 +19,10 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
   //for doctor to work with patients.
   for (int x = 0; x < amount; x++) {
     //For AM or PM appointments.
-    if (doc.get_name() == docs[x].get_name() &&
-      Setdate.getYear() == time[x].getYear() &&
-      Setdate.getMonth() == time[x].getMonth() &&
-      Setdate.getPMorAM() == time[x].getPMorAM() &&
+    if (doc.get_firstName() == docs[x].get_firstName() &&
+        Setdate.getYear() == time[x].getYear() &&
+        Setdate.getMonth() == time[x].getMonth() &&
+        Setdate.getPMorAM() == time[x].getPMorAM() &&
         Setdate.getDay() == time[x].getDay()) {
       if (Setdate.getMinute() < 30) {
         if (Setdate.getHour() == time[x].getHour() || Setdate.getHour() - 1 == time[x].getHour()) {
@@ -65,7 +65,7 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
 
 
     //For around 12 appointments where AM and PM change and 12 to 1 which is harder to code because not + 1.
-    if (doc.get_name() == docs[x].get_name() &&
+    if (doc.get_firstName() == docs[x].get_firstName() &&
       Setdate.getYear() == time[x].getYear() &&
       Setdate.getMonth() == time[x].getMonth() &&
       Setdate.getPMorAM() != time[x].getPMorAM() && // If one is at 12:00 PM and other is at 11:50 AM
@@ -110,14 +110,15 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
     amount++;
   }
   else {
-    cout << "Error!!! Scheduling conflict. " << peeps[errorNumber].get_name() << "'s appointment is too close. Here is there appointment information." << endl;
-    get_Appointment(peeps[errorNumber].get_name());
+    cout << "Error!!! Scheduling conflict. " << peeps[errorNumber].get_firstName() << " " << peeps[errorNumber].get_lastName()
+         << "'s appointment is too close. Here is there appointment information." << endl;
+    get_Appointment(peeps[errorNumber].get_firstName(), peeps[errorNumber].get_lastName());
   }
 }
 
-void Appointment::del_Appointment(string eraseName) {
+void Appointment::del_Appointment(string eraseFirstName, string eraseLastName) {
   for (int find = 0; find < amount; find++) {
-    if (peeps[find].get_name() == eraseName) {
+    if (peeps[find].get_firstName() == eraseFirstName && peeps[find].get_lastName() == eraseLastName) {
       peeps.erase(peeps.begin() + find);
 
       docs.erase(docs.begin() + find);
@@ -129,24 +130,27 @@ void Appointment::del_Appointment(string eraseName) {
   }
 }
 
-void Appointment::get_Appointment(string nameInput) {
+void Appointment::get_Appointment(string firstNameInput, string lastNameInput) {
 
   //Gets max name length for output.
   int maxNameLength = 0;
   for (int find = 0; find < amount; find++) {
-    string tempName = peeps[find].get_name();
-    if (tempName.length() > maxNameLength) {
-      maxNameLength = tempName.length();
+    string tempFirstName = peeps[find].get_firstName();
+    string tempLastName = peeps[find].get_lastName();
+    if (tempFirstName.length() + tempLastName.length() > maxNameLength) {
+      maxNameLength = tempFirstName.length() + tempLastName.length() + 1;
     }
   }
 
   //Outputs the appointment information for specified patient.
   for (int find = 0; find < amount; find++) {
-    if (peeps[find].get_name() == nameInput) {
-      cout << setw(maxNameLength) << left << peeps[find].get_name() << " is scheduled for "
+    if (peeps[find].get_firstName() == firstNameInput && peeps[find].get_lastName() == lastNameInput) {
+      string patOutputName = peeps[find].get_firstName() + " " + peeps[find].get_lastName(); //So setw works properly
+      string docOutputName = docs[find].get_firstName() + " " + docs[find].get_lastName(); //So setw works properly
+      cout << setw(maxNameLength) << left << patOutputName << " is scheduled for "
            << right << setw(2) << time[find].getHour() << ":" << setw(2) << time[find].getMinute() << " " << time[find].getPMorAM()
            << " on " << setw(2) << time[find].getMonth() << "/" << setw(2) << time[find].getDay() << "/" << time[find].getYear()
-           << " with " << docs[find].get_Profession() << " Dr. " << docs[find].get_name() << endl;
+           << " with " << docs[find].get_Profession() << " Dr. " << docOutputName << endl;
     }
   }
 }

@@ -10,7 +10,7 @@ class Doctor : public People {
 private:
   string type;
 public:
-  Doctor(string);
+  Doctor(string, string);
   void set_Profession(string);
   string get_Profession();
 };

@@ -14,10 +14,10 @@ void fileOut(Appointment &appointments) {
     Date * tempDate = new Date(appointments.get_time(out));
     Patient * tempPat = new Patient(appointments.get_Patient(out));
     Doctor * tempDoc = new Doctor(appointments.get_Doctor(out));
-    outAppointments << tempPat->get_name() << " "
+    outAppointments << tempPat->get_firstName() << " " << tempPat->get_lastName() << " "
                     << tempDate->getMonth() << " " << tempDate->getDay() << " " << tempDate->getYear() << " "
                     << tempDate->getHour() << " " << tempDate->getMinute() << " " << tempDate->getPMorAM() << " "
-                    << tempDoc->get_name() << " " << tempDoc->get_Profession() << endl;
+                    << tempDoc->get_firstName() << " " << tempDoc->get_lastName() << " " << tempDoc->get_Profession() << endl;
   }
   cout << "All appointments have been successfully saved." << endl;
 }
@@ -25,21 +25,31 @@ void fileOut(Appointment &appointments) {
 //Inputs appointments stored in program into appointment class.
 void fileIn(Appointment &appointments) {
 
-  string docNameTemp, docProfTemp, patNameTemp, tempAMorPM;
+  string docFirstNameTemp, docLastNameTemp, docProfTemp, patFirstNameTemp, patLastNameTemp, tempAMorPM;
   int tempMonth, tempDay, tempYear, tempHour, tempMinute;
 
   fstream inAppointments;
   inAppointments.open("Appointments.txt", ios::in);
   int x = 0;
   while(inAppointments.good()) {
-    patNameTemp = "";
-    inAppointments >> patNameTemp >> tempMonth >> tempDay >> tempYear >> tempHour >> tempMinute >> tempAMorPM >> docNameTemp >> docProfTemp;
-    if (patNameTemp == "") {
+    patFirstNameTemp = "";
+    inAppointments >> patFirstNameTemp
+                   >> patLastNameTemp
+                   >> tempMonth
+                   >> tempDay
+                   >> tempYear
+                   >> tempHour
+                   >> tempMinute
+                   >> tempAMorPM
+                   >> docFirstNameTemp
+                   >> docLastNameTemp
+                   >> docProfTemp;
+    if (patFirstNameTemp == "") { //So a new line at end of document doesn't cause weird things to happen.
       break;
     }
-    Doctor * docTemp = new Doctor(docNameTemp);
+    Doctor * docTemp = new Doctor(docFirstNameTemp, docLastNameTemp);
     docTemp->set_Profession(docProfTemp);
-    Patient * patTemp = new Patient(patNameTemp);
+    Patient * patTemp = new Patient(patFirstNameTemp, patLastNameTemp);
     Date * dateTemp = new Date(tempMonth, tempDay, tempYear, tempHour, tempMinute, tempAMorPM);
     appointments.set_Appointment(*patTemp, *docTemp, *dateTemp);
     x++;
@@ -51,9 +61,9 @@ void fileIn(Appointment &appointments) {
 }
 
 //Allows user to create an appointment.
-void userIn(Appointment &appointments) {
+void userInAppointment(Appointment &appointments) {
 
-  string docNameTemp, docProfTemp, patNameTemp, tempAMorPM;
+  string docFirstNameTemp, docLastNameTemp, docProfTemp, patFirstNameTemp, patLastNameTemp, tempAMorPM;
   int tempMonth, tempDay, tempYear, tempHour, tempMinute;
 
   bool input = false;
@@ -64,10 +74,10 @@ void userIn(Appointment &appointments) {
     input = true;
   }
   while (input) {
-    cout << "Input Patient's name: ";
-    cin >> patNameTemp;
-    cout << "Input Doctor's name: ";
-    cin >> docNameTemp;
+    cout << "Input Patient's name (FIRST LAST): ";
+    cin >> patFirstNameTemp >> patLastNameTemp;
+    cout << "Input Doctor's name (FIRST LAST): ";
+    cin >> docFirstNameTemp >> docLastNameTemp;
     cout << "Input Doctor's Profession: ";
     cin >> docProfTemp;
     cout << "Input MM/DD/YYYY: ";
@@ -77,9 +87,9 @@ void userIn(Appointment &appointments) {
     cout << "AM or PM: ";
     cin >> tempAMorPM;
 
-    Doctor * docTemp = new Doctor(docNameTemp);
+    Doctor * docTemp = new Doctor(docFirstNameTemp, docLastNameTemp);
     docTemp->set_Profession(docProfTemp);
-    Patient * patTemp = new Patient(patNameTemp);
+    Patient * patTemp = new Patient(patFirstNameTemp, patLastNameTemp);
     Date * dateTemp = new Date(tempMonth, tempDay, tempYear, tempHour, tempMinute, tempAMorPM);
     appointments.set_Appointment(*patTemp, *docTemp, *dateTemp);
     delete docTemp;
@@ -105,19 +115,19 @@ void UserDelAppointment(Appointment &appointments) {
     input = true;
   }
   while (input) {
-    string nameToDelete;
+    string firstNameToDelete, lastNameToDelete;
     bool correctName = false;
     char userInput2;
-    cout << "Input patients name to delete:";
-    cin >> nameToDelete;
-    appointments.get_Appointment(nameToDelete);
+    cout << "Input patients first and last name to delete:";
+    cin >> firstNameToDelete >> lastNameToDelete;
+    appointments.get_Appointment(firstNameToDelete, lastNameToDelete);
     cout << "Is this the appointment you would like to delete? Enter Yes(y) or No(n):";
     cin >> userInput2;
     if (userInput2 == 'y' || userInput2 == 'Y') {
       correctName = true;
     }
     if (correctName) {
-      appointments.del_Appointment(nameToDelete);
+      appointments.del_Appointment(firstNameToDelete, lastNameToDelete);
     }
     cout << "Would you like to delete another appointment? Enter Yes(y) or No(n):";
     cin >> userInput;
@@ -158,7 +168,11 @@ void orderOutputSoon(Appointment &appointments) {
           for (int minute = 1; minute < 60; minute++) {
             for (int check = 0; check < appointments.get_amount(); check++) {
               Date * temp = new Date(appointments.get_time(check));
-              if (temp->getMonth() == month && temp->getDay() == day && temp->getHour() == hour && temp->getMinute() == minute) {
+              if (temp->getYear() == year &&
+                  temp->getMonth() == month &&
+                  temp->getDay() == day &&
+                  temp->getHour() == hour &&
+                  temp->getMinute() == minute) {
                 order[check] = orderNum;
                 orderNum++;
               }
@@ -172,6 +186,7 @@ void orderOutputSoon(Appointment &appointments) {
   //Calculates and puts which appointments that are less than 2 weeks away into a bool vector.
   Date realTime;
   vector<bool> output(appointments.get_amount());
+  //Zero the vector
   for (int zero = 0; zero < appointments.get_amount(); zero++) {
     output[zero] = 0;
   }
@@ -180,7 +195,7 @@ void orderOutputSoon(Appointment &appointments) {
   for (int index = 0; index < appointments.get_amount(); index++) {
     Date * tempDate = new Date(appointments.get_time(index));
 
-    //Accounds for months that have 30 or 31 days.
+    //Accounts for months that have 30 or 31 days.
     //July and august have 31 days which messes up % 2...
     if (realTime.getMonth() == 1 ||
         realTime.getMonth() == 3 ||
@@ -225,7 +240,7 @@ void orderOutputSoon(Appointment &appointments) {
     for (int index = 0; index < appointments.get_amount(); index++) {
       if (order[index] == replace && output[index] == true) {
         Patient * temp2 = new Patient(temp->get_Patient(index));
-        temp->get_Appointment(temp2->get_name());
+        temp->get_Appointment(temp2->get_firstName(), temp2->get_lastName());
       }
     }
   }
@@ -240,7 +255,7 @@ void orderOutputAll(Appointment &appointments) {
   Date now;
   vector<int> order(appointments.get_amount());
   //Tests if there are any appointments scheduled for years ahead because
-  //it takes a lot of time to go through for loops ahead if you go through it multiple times
+  //it takes a lot of time to go through for loops if you go through it multiple times
   //so if appointments are only scheduled for a certain year then it cuts down calculation time.
   int max = now.getYear();
   for (int yearStart = now.getYear(); yearStart <= now.getYear() + 10; yearStart++) {
@@ -254,7 +269,7 @@ void orderOutputAll(Appointment &appointments) {
 
 
 
-  //Very unefficient way at finding order of appointments.
+  //The most inefficient way at finding order of appointments, but is very precise.
   int difference = max - now.getYear();
   int orderNum = 0;
   cout << "Loading..." << endl;
@@ -265,7 +280,11 @@ void orderOutputAll(Appointment &appointments) {
           for (int minute = 1; minute < 60; minute++) {
             for (int check = 0; check < appointments.get_amount(); check++) {
               Date * temp = new Date(appointments.get_time(check));
-              if (temp->getMonth() == month && temp->getDay() == day && temp->getHour() == hour && temp->getMinute() == minute) {
+              if (temp->getYear() == year &&
+                  temp->getMonth() == month &&
+                  temp->getDay() == day &&
+                  temp->getHour() == hour &&
+                  temp->getMinute() == minute) {
                 order[check] = orderNum;
                 orderNum++;
               }
@@ -281,7 +300,7 @@ void orderOutputAll(Appointment &appointments) {
     for (int index = 0; index < appointments.get_amount(); index++) {
       if (order[index] == replace) {
         Patient * outputNames = new Patient(temp->get_Patient(index));
-        temp->get_Appointment(outputNames->get_name());
+        temp->get_Appointment(outputNames->get_firstName(), outputNames->get_lastName());
         delete outputNames;
       }
     }
@@ -292,8 +311,8 @@ void orderOutputAll(Appointment &appointments) {
 }
 
 //Allows user to search for a patients appointment.
-void patientFind(Appointment &appointments) {
-  string name;
+void patientLookup(Appointment &appointments) {
+  string firstName, lastName;
   bool search = false;
   char userinput;
   cout << "Would you like to search for a patient's appointment? Enter Yes(y) or No(n): ";
@@ -302,13 +321,13 @@ void patientFind(Appointment &appointments) {
     search = true;
   }
   while (search) {
-    cout << "Enter patients name (Enter 'all' to list all scheduled appointments):";
-    cin >> name;
-    if (name == "all") {
+    cout << "Enter patients first and last name (Enter 'all' for first and last name to list all scheduled appointments):";
+    cin >> firstName >> lastName;
+    if (firstName == "all" && lastName == "all") {
       orderOutputAll(appointments);
     }
     else {
-      appointments.get_Appointment(name);
+      appointments.get_Appointment(firstName, lastName);
     }
     cout << "Would you like to search for another patient's appointment? Enter Yes(y) or No(n): ";
     cin >> userinput;
@@ -324,8 +343,8 @@ int main() {
   //and just use different objects as different offices.
   Appointment schedule;
   fileIn(schedule);
-  userIn(schedule);
-  patientFind(schedule);
+  userInAppointment(schedule);
+  patientLookup(schedule);
   UserDelAppointment(schedule);
   orderOutputSoon(schedule);
   fileOut(schedule);
