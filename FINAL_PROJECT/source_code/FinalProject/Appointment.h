@@ -16,6 +16,7 @@ private:
   int amount = 0;
 public:
   Appointment();
+  void copy(Appointment);
   void set_Appointment(Patient pat, Doctor doc, Date Setdate);
   void del_Appointment(string eraseFirstName, string eraseLastName);
   void get_Appointment(string firstNameInput, string lastNameInput);

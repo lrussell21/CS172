@@ -6,6 +6,31 @@
 #include "Patient.h"
 using namespace std;
 
+void fileOut(Appointment &appointments);
+void fileIn(Appointment &appointments);
+void userInAppointment(Appointment &appointments);
+void UserDelAppointment(Appointment &appointments);
+void order(Appointment &appointments);
+void orderOutputSoon(Appointment &appointments);
+void outputAll(Appointment &appointments);
+void patientLookup(Appointment &appointments);
+
+int main() {
+  //Creates an object for the appointment class.
+  //You could create a vector with object type Appointment
+  //and just use different objects as different offices.
+  Appointment schedule;
+  fileIn(schedule);
+  userInAppointment(schedule);
+  order(schedule);
+  patientLookup(schedule);
+  UserDelAppointment(schedule);
+  orderOutputSoon(schedule);
+  fileOut(schedule);
+}
+
+
+
 //Outputs appointment class to a file to save appointments.
 void fileOut(Appointment &appointments) {
   fstream outAppointments;
@@ -14,10 +39,17 @@ void fileOut(Appointment &appointments) {
     Date * tempDate = new Date(appointments.get_time(out));
     Patient * tempPat = new Patient(appointments.get_Patient(out));
     Doctor * tempDoc = new Doctor(appointments.get_Doctor(out));
-    outAppointments << tempPat->get_firstName() << " " << tempPat->get_lastName() << " "
-                    << tempDate->getMonth() << " " << tempDate->getDay() << " " << tempDate->getYear() << " "
-                    << tempDate->getHour() << " " << tempDate->getMinute() << " " << tempDate->getPMorAM() << " "
-                    << tempDoc->get_firstName() << " " << tempDoc->get_lastName() << " " << tempDoc->get_Profession() << endl;
+    outAppointments << tempPat->get_firstName() << " "
+      << tempPat->get_lastName() << " "
+      << tempDate->getMonth() << " "
+      << tempDate->getDay() << " "
+      << tempDate->getYear() << " "
+      << tempDate->getHour() << " "
+      << tempDate->getMinute() << " "
+      << tempDate->getPMorAM() << " "
+      << tempDoc->get_firstName() << " "
+      << tempDoc->get_lastName() << " "
+      << tempDoc->get_Profession() << endl;
   }
   cout << "All appointments have been successfully saved." << endl;
 }
@@ -31,19 +63,19 @@ void fileIn(Appointment &appointments) {
   fstream inAppointments;
   inAppointments.open("Appointments.txt", ios::in);
   int x = 0;
-  while(inAppointments.good()) {
+  while (inAppointments.good()) {
     patFirstNameTemp = "";
     inAppointments >> patFirstNameTemp
-                   >> patLastNameTemp
-                   >> tempMonth
-                   >> tempDay
-                   >> tempYear
-                   >> tempHour
-                   >> tempMinute
-                   >> tempAMorPM
-                   >> docFirstNameTemp
-                   >> docLastNameTemp
-                   >> docProfTemp;
+      >> patLastNameTemp
+      >> tempMonth
+      >> tempDay
+      >> tempYear
+      >> tempHour
+      >> tempMinute
+      >> tempAMorPM
+      >> docFirstNameTemp
+      >> docLastNameTemp
+      >> docProfTemp;
     if (patFirstNameTemp == "") { //So a new line at end of document doesn't cause weird things to happen.
       break;
     }
@@ -137,51 +169,138 @@ void UserDelAppointment(Appointment &appointments) {
   }
 }
 
-//Outputs appointments in order that are within 2 weeks of realtime.
-void orderOutputSoon(Appointment &appointments) {
-  Appointment * temp = new Appointment(appointments);
+//Outputs all appointments in order.
+void order(Appointment &appointments) {
   Date now;
   vector<int> order(appointments.get_amount());
-  //Tests if there are any appointments scheduled for years ahead because
-  //it takes a lot of time to go through for loops ahead if you go through it multiple times
-  //so if appointments are only scheduled for a certain year then it cuts down calculation time.
-  int max = now.getYear();
-  for (int yearStart = now.getYear(); yearStart <= now.getYear() + 10; yearStart++) {
-    for (int index = 0; index < appointments.get_amount(); index++) {
-      Date * temp = new Date(appointments.get_time(index));
-      if (temp->getYear() == yearStart) {
-        max = yearStart;
-      }
-    }
+  int orderNum = 0;
+  for (int number = 0; number < appointments.get_amount(); number++) {
+    order[number] = number;
+    orderNum++;
   }
 
+  //Gets the order of the appointments
+  int tempNum = -1;
+  bool change;
 
+  do {
+    change = false;
 
-  //Very unefficient way at finding order of appointments.
-  int difference = max - now.getYear();
-  int orderNum = 0;
-  cout << "Loading upcoming appointments..." << endl;
-  for (int year = now.getYear(); year <= now.getYear() + difference; year++) {
-    for (int month = 1; month <= 12; month++) {
-      for (int day = 1; day <= 30; day++) {
-        for (int hour = 1; hour <= 12; hour++) {
-          for (int minute = 1; minute < 60; minute++) {
-            for (int check = 0; check < appointments.get_amount(); check++) {
-              Date * temp = new Date(appointments.get_time(check));
-              if (temp->getYear() == year &&
-                  temp->getMonth() == month &&
-                  temp->getDay() == day &&
-                  temp->getHour() == hour &&
-                  temp->getMinute() == minute) {
-                order[check] = orderNum;
-                orderNum++;
+    for (int mainCheck = 0; mainCheck < appointments.get_amount(); mainCheck++) {
+      Date * tempDate = new Date(appointments.get_time(mainCheck));
+
+      for (int check = 0; check < appointments.get_amount(); check++) {
+        Date * tempCheckDate = new Date(appointments.get_time(check));
+        //If same day then checks time
+        if (tempDate->getYear() == tempCheckDate->getYear() &&
+          tempDate->getMonth() == tempCheckDate->getMonth() &&
+          tempDate->getDay() == tempCheckDate->getDay()) {
+
+          //Check times
+          if (tempDate->getPMorAM() == tempDate->getPMorAM()) {
+
+            if (tempDate->getHour() > tempCheckDate->getHour() &&
+              order[mainCheck] < order[check]) {
+
+              tempNum = order[mainCheck];
+              order[mainCheck] = order[check];
+              order[check] = tempNum;
+              change = true;
+            }
+
+            if (tempDate->getHour() == tempCheckDate->getHour()) {
+              if (tempDate->getMinute() > tempCheckDate->getMinute() &&
+                order[mainCheck] < order[check]) {
+
+                tempNum = order[mainCheck];
+                order[mainCheck] = order[check];
+                order[check] = tempNum;
+                change = true;
               }
             }
           }
+
+          if (tempDate->getPMorAM() == "PM" &&
+            tempCheckDate->getPMorAM() == "AM" &&
+            order[mainCheck] < order[check]) {
+
+            tempNum = order[mainCheck];
+            order[mainCheck] = order[check];
+            order[check] = tempNum;
+            change = true;
+          }
+
+          if (tempDate->getPMorAM() == "AM" &&
+            tempCheckDate->getPMorAM() == "PM" &&
+            order[mainCheck] > order[check]) {
+            tempNum = order[check];
+            order[check] = order[mainCheck];
+            order[mainCheck] = tempNum;
+            change = true;
+          }
         }
+
+        //If same month check day
+        if (tempDate->getYear() == tempCheckDate->getYear() &&
+          tempDate->getMonth() == tempCheckDate->getMonth() &&
+          tempDate->getDay() > tempCheckDate->getDay() &&
+          order[mainCheck] < order[check]) {
+
+          tempNum = order[mainCheck];
+          order[mainCheck] = order[check];
+          order[check] = tempNum;
+          change = true;
+        }
+
+        //If same year check month
+        if (tempDate->getYear() == tempCheckDate->getYear() &&
+          tempDate->getMonth() > tempCheckDate->getMonth() &&
+          order[mainCheck] < order[check]) {
+
+          tempNum = order[mainCheck];
+          order[mainCheck] = order[check];
+          order[check] = tempNum;
+          change = true;
+        }
+        //If different year
+        if (tempDate->getYear() > tempCheckDate->getYear() &&
+          order[mainCheck] < order[check]) {
+
+          tempNum = order[mainCheck];
+          order[mainCheck] = order[check];
+          order[check] = tempNum;
+          change = true;
+        }
+
+        delete tempCheckDate;
+      }
+      delete tempDate;
+    }
+
+  } while (change);
+
+  //Creates a temporary pointer of an appointment object that puts
+  //all the appointments in order then copy's original object to one in order.
+  Appointment * temp = new Appointment;
+  for (int replace = 0; replace < appointments.get_amount(); replace++) {
+    for (int index = 0; index < appointments.get_amount(); index++) {
+      if (order[index] == replace) {
+        Doctor * docTemp = new Doctor(appointments.get_Doctor(index));
+        Patient * patTemp = new Patient(appointments.get_Patient(index));
+        Date * dateTemp = new Date(appointments.get_time(index));
+        temp->set_Appointment(*patTemp, *docTemp, *dateTemp);
+        delete docTemp;
+        delete patTemp;
+        delete dateTemp;
       }
     }
   }
+  appointments = *temp;
+  delete temp;
+}
+
+//Outputs appointments in order that are within 2 weeks of realtime.
+void orderOutputSoon(Appointment &appointments) {
 
   //Calculates and puts which appointments that are less than 2 weeks away into a bool vector.
   Date realTime;
@@ -198,12 +317,12 @@ void orderOutputSoon(Appointment &appointments) {
     //Accounts for months that have 30 or 31 days.
     //July and august have 31 days which messes up % 2...
     if (realTime.getMonth() == 1 ||
-        realTime.getMonth() == 3 ||
-        realTime.getMonth() == 5 ||
-        realTime.getMonth() == 7 ||
-        realTime.getMonth() == 8 ||
-        realTime.getMonth() == 10 ||
-        realTime.getMonth() == 12) {
+      realTime.getMonth() == 3 ||
+      realTime.getMonth() == 5 ||
+      realTime.getMonth() == 7 ||
+      realTime.getMonth() == 8 ||
+      realTime.getMonth() == 10 ||
+      realTime.getMonth() == 12) {
       isItThatTypeOfMonth = 1;
     }
     else {
@@ -235,79 +354,25 @@ void orderOutputSoon(Appointment &appointments) {
     delete tempDate;
   }
 
-  //Outputs appointments in order, but only if they are less than 2 weeks away.
-  for (int replace = 0; replace < orderNum; replace++) {
-    for (int index = 0; index < appointments.get_amount(); index++) {
-      if (order[index] == replace && output[index] == true) {
-        Patient * temp2 = new Patient(temp->get_Patient(index));
-        temp->get_Appointment(temp2->get_firstName(), temp2->get_lastName());
-      }
+  //Outputs appointments if they are found to be close enough
+  for (int index = 0; index < appointments.get_amount(); index++) {
+    if (output[index]) {
+      Patient * temp2 = new Patient(appointments.get_Patient(index));
+      appointments.get_Appointment(temp2->get_firstName(), temp2->get_lastName());
     }
   }
 
-
-  delete temp;
 }
 
-//Outputs all appointments in order.
-void orderOutputAll(Appointment &appointments) {
-  Appointment * temp = new Appointment(appointments);
-  Date now;
-  vector<int> order(appointments.get_amount());
-  //Tests if there are any appointments scheduled for years ahead because
-  //it takes a lot of time to go through for loops if you go through it multiple times
-  //so if appointments are only scheduled for a certain year then it cuts down calculation time.
-  int max = now.getYear();
-  for (int yearStart = now.getYear(); yearStart <= now.getYear() + 10; yearStart++) {
-    for (int index = 0; index < appointments.get_amount(); index++) {
-      Date * temp = new Date(appointments.get_time(index));
-      if (temp->getYear() == yearStart) {
-        max = yearStart;
-      }
-    }
+//Outputs all the scheduled appointments in order
+void outputAll(Appointment &appointments) {
+  //Outputs appointments in order.
+  cout << "All scheduled appointments:" << endl;
+  for (int out = 0; out < appointments.get_amount(); out++) {
+    Patient * temp = new Patient(appointments.get_Patient(out));
+    appointments.get_Appointment(temp->get_firstName(), temp->get_lastName());
+    delete temp;
   }
-
-
-
-  //The most inefficient way at finding order of appointments, but is very precise.
-  int difference = max - now.getYear();
-  int orderNum = 0;
-  cout << "Loading..." << endl;
-  for (int year = now.getYear(); year <= now.getYear() + difference; year++) {
-    for (int month = 1; month <= 12; month++) {
-      for (int day = 1; day <= 30; day++) {
-        for (int hour = 1; hour <= 12; hour++) {
-          for (int minute = 1; minute < 60; minute++) {
-            for (int check = 0; check < appointments.get_amount(); check++) {
-              Date * temp = new Date(appointments.get_time(check));
-              if (temp->getYear() == year &&
-                  temp->getMonth() == month &&
-                  temp->getDay() == day &&
-                  temp->getHour() == hour &&
-                  temp->getMinute() == minute) {
-                order[check] = orderNum;
-                orderNum++;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  //Outputs appointments in order, but only if they are less than 2 weeks away.
-  for (int replace = 0; replace < orderNum; replace++) {
-    for (int index = 0; index < appointments.get_amount(); index++) {
-      if (order[index] == replace) {
-        Patient * outputNames = new Patient(temp->get_Patient(index));
-        temp->get_Appointment(outputNames->get_firstName(), outputNames->get_lastName());
-        delete outputNames;
-      }
-    }
-  }
-
-
-  delete temp;
 }
 
 //Allows user to search for a patients appointment.
@@ -324,7 +389,7 @@ void patientLookup(Appointment &appointments) {
     cout << "Enter patients first and last name (Enter 'all' for first and last name to list all scheduled appointments):";
     cin >> firstName >> lastName;
     if (firstName == "all" && lastName == "all") {
-      orderOutputAll(appointments);
+      outputAll(appointments);
     }
     else {
       appointments.get_Appointment(firstName, lastName);
@@ -335,17 +400,4 @@ void patientLookup(Appointment &appointments) {
       search = false;
     }
   }
-}
-
-int main() {
-  //Creates an object for the appointment class.
-  //You could create a vector with object type Appointment
-  //and just use different objects as different offices.
-  Appointment schedule;
-  fileIn(schedule);
-  userInAppointment(schedule);
-  patientLookup(schedule);
-  UserDelAppointment(schedule);
-  orderOutputSoon(schedule);
-  fileOut(schedule);
 }

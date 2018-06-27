@@ -7,6 +7,10 @@ Appointment::Appointment() {
 
 }
 
+void Appointment::copy(Appointment appCopy) {
+
+}
+
 void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
 
   bool input = true;
@@ -24,6 +28,7 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
         Setdate.getMonth() == time[x].getMonth() &&
         Setdate.getPMorAM() == time[x].getPMorAM() &&
         Setdate.getDay() == time[x].getDay()) {
+
       if (Setdate.getMinute() < 30) {
         if (Setdate.getHour() == time[x].getHour() || Setdate.getHour() - 1 == time[x].getHour()) {
           minuteCheck = 30 + Setdate.getMinute();
@@ -39,6 +44,7 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
           }
         }
       }
+
       if (Setdate.getMinute() > 30) {
         if (Setdate.getHour() == time[x].getHour() || Setdate.getHour() + 1 == time[x].getHour()) {
           minuteCheck = Setdate.getMinute() - 30;
@@ -54,6 +60,7 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
           }
         }
       }
+
       if (Setdate.getMinute() == 30 && time[x].getHour() == Setdate.getHour()) {
         if (time[x].getMinute() <= 59 && time[x].getMinute() >= 1) {
           input = false;
