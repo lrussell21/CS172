@@ -11,7 +11,7 @@ void fileIn(Appointment &appointments);
 void userInAppointment(Appointment &appointments);
 void UserDelAppointment(Appointment &appointments);
 void order(Appointment &appointments);
-void orderOutputSoon(Appointment &appointments);
+void outputSoon(Appointment &appointments);
 void outputAll(Appointment &appointments);
 void patientLookup(Appointment &appointments);
 
@@ -25,7 +25,7 @@ int main() {
   order(schedule);
   patientLookup(schedule);
   UserDelAppointment(schedule);
-  orderOutputSoon(schedule);
+  outputSoon(schedule);
   fileOut(schedule);
 }
 
@@ -53,6 +53,7 @@ void fileOut(Appointment &appointments) {
   }
   cout << "All appointments have been successfully saved." << endl;
 }
+
 
 //Inputs appointments stored in program into appointment class.
 void fileIn(Appointment &appointments) {
@@ -91,6 +92,7 @@ void fileIn(Appointment &appointments) {
   }
 
 }
+
 
 //Allows user to create an appointment.
 void userInAppointment(Appointment &appointments) {
@@ -137,6 +139,7 @@ void userInAppointment(Appointment &appointments) {
 
 }
 
+
 //Allows user to delete an appointment
 void UserDelAppointment(Appointment &appointments) {
   bool input = false;
@@ -168,6 +171,7 @@ void UserDelAppointment(Appointment &appointments) {
     }
   }
 }
+
 
 //Outputs all appointments in order.
 void order(Appointment &appointments) {
@@ -299,9 +303,10 @@ void order(Appointment &appointments) {
   delete temp;
 }
 
-//Outputs appointments in order that are within 2 weeks of realtime.
-void orderOutputSoon(Appointment &appointments) {
 
+//Outputs appointments in order that are within 2 weeks of realtime.
+void outputSoon(Appointment &appointments) {
+  cout << "Upcoming appointments:" << endl;
   //Calculates and puts which appointments that are less than 2 weeks away into a bool vector.
   Date realTime;
   vector<bool> output(appointments.get_amount());
@@ -317,13 +322,14 @@ void orderOutputSoon(Appointment &appointments) {
     //Accounts for months that have 30 or 31 days.
     //July and august have 31 days which messes up % 2...
     if (realTime.getMonth() == 1 ||
-      realTime.getMonth() == 3 ||
-      realTime.getMonth() == 5 ||
-      realTime.getMonth() == 7 ||
-      realTime.getMonth() == 8 ||
-      realTime.getMonth() == 10 ||
-      realTime.getMonth() == 12) {
-      isItThatTypeOfMonth = 1;
+        realTime.getMonth() == 3 ||
+        realTime.getMonth() == 5 ||
+        realTime.getMonth() == 7 ||
+        realTime.getMonth() == 8 ||
+        realTime.getMonth() == 10 ||
+        realTime.getMonth() == 12) {
+
+          isItThatTypeOfMonth = 1;
     }
     else {
       isItThatTypeOfMonth = 0;
@@ -337,7 +343,7 @@ void orderOutputSoon(Appointment &appointments) {
 
 
     if (realTime.getDay() > 16) {
-      dayTemp = isItThatTypeOfMonth + 30 - realTime.getDay();
+      dayTemp = 14 - (isItThatTypeOfMonth + 30 - realTime.getDay());
       if (realTime.getMonth() + 1 == tempDate->getMonth() && tempDate->getDay() <= dayTemp) {
         output[index] = 1;
       }
@@ -364,6 +370,7 @@ void orderOutputSoon(Appointment &appointments) {
 
 }
 
+
 //Outputs all the scheduled appointments in order
 void outputAll(Appointment &appointments) {
   //Outputs appointments in order.
@@ -374,6 +381,7 @@ void outputAll(Appointment &appointments) {
     delete temp;
   }
 }
+
 
 //Allows user to search for a patients appointment.
 void patientLookup(Appointment &appointments) {

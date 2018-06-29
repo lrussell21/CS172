@@ -13,7 +13,7 @@ using namespace std;
     */
 
     // Have to add _CRT_SECURE_NO_WARNINGS to Visual Studio c++ preprocessor definitions for localtime to work
-    //If you don't it tells you to put localtime_s and I don't know how to change my code to work with that...
+    //If you don't it tells you to put localtime_s and I don't know how to change my code to work with that...(see above)
     time_t tt;
     time(&tt);
     tm timeinfo = *localtime(&tt);

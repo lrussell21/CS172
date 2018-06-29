@@ -4,11 +4,7 @@
 using namespace std;
 
 Appointment::Appointment() {
-
-}
-
-void Appointment::copy(Appointment appCopy) {
-
+  //Don't need to do anything when object is created.
 }
 
 void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
@@ -124,6 +120,7 @@ void Appointment::set_Appointment(Patient pat, Doctor doc, Date Setdate) {
 }
 
 void Appointment::del_Appointment(string eraseFirstName, string eraseLastName) {
+  //Goes through all the appointments and if the name matches the one given it deletes that appointment.
   for (int find = 0; find < amount; find++) {
     if (peeps[find].get_firstName() == eraseFirstName && peeps[find].get_lastName() == eraseLastName) {
       peeps.erase(peeps.begin() + find);
@@ -139,13 +136,13 @@ void Appointment::del_Appointment(string eraseFirstName, string eraseLastName) {
 
 void Appointment::get_Appointment(string firstNameInput, string lastNameInput) {
 
-  //Gets max name length for output.
+  //Gets max name length for output formatting.
   int maxNameLength = 0;
   for (int find = 0; find < amount; find++) {
     string tempFirstName = peeps[find].get_firstName();
     string tempLastName = peeps[find].get_lastName();
     if (tempFirstName.length() + tempLastName.length() > maxNameLength) {
-      maxNameLength = tempFirstName.length() + tempLastName.length() + 1;
+      maxNameLength = tempFirstName.length() + tempLastName.length() + 2;
     }
   }
 
